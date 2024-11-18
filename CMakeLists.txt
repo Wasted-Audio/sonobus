@@ -22,7 +22,7 @@ if (APPLE)
     set (CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE INTERNAL "")
     if (UniversalBinary)
         set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE INTERNAL "")
-        #set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)        
+        #set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
     endif()
 endif()
 
@@ -54,7 +54,7 @@ set(BUILDVERSION 80)
 set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
 # No ZERO_CHECK target (it helps bust cache for cmake)
-set(CMAKE_SUPPRESS_REGENERATION true) 
+set(CMAKE_SUPPRESS_REGENERATION true)
 
 # prevent install all
 #set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
@@ -82,17 +82,13 @@ juce_add_modules(deps/ff_meters)
 
 
 
-set (FormatsToBuild VST3 Standalone)
+set (FormatsToBuild VST3 Standalone LV2)
 
 # On Mac, a AU version will be built too
 if (APPLE)
     list (APPEND FormatsToBuild AU)
 endif()
 
-# On Linux, LV2 will be built too
-if (UNIX)
-    list (APPEND FormatsToBuild LV2)
-endif()
 
 # If you are building a VST2 or AAX plugin, CMake needs to be told where to find these SDKs on your
 # system. This setup should be done before calling `juce_add_plugin`.
@@ -103,7 +99,7 @@ endif()
 
 if (AAX_SDK_PATH)
     juce_set_aax_sdk_path (${AAX_SDK_PATH})
-    
+
     if (APPLE OR (NOT ("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "Win32")))
       list (APPEND FormatsToBuild AAX)
     endif()
@@ -146,7 +142,7 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
         set (vst3cats Instrument Network)
         set (vst2cat "kPlugCategSynth")
     else()
-        set (vst3cats Fx Network)        
+        set (vst3cats Fx Network)
         set (vst2cat "kPlugCategEffect")
    endif()
 
@@ -158,7 +154,7 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
         COMPANY_NAME "Sonosaurus"
         BUNDLE_ID "com.Sonosaurus.SonoBus"
         MICROPHONE_PERMISSION_ENABLED TRUE
-        
+
         ICON_BIG "images/sonobus_icon_mac_1024.png"
         ICON_SMALL "images/sonobus_icon_mac_256.png"
         NEEDS_WEB_BROWSER FALSE
@@ -167,14 +163,14 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
         AAX_CATEGORY "AAX_ePlugInCategory_None"
 
 	LV2URI "https://sonobus.net/lv2/sonobus"
-	
+
         # mac settings
         HARDENED_RUNTIME_ENABLED TRUE
         HARDENED_RUNTIME_OPTIONS "com.apple.security.device.audio-input"
         PLIST_TO_MERGE "${MacPList}"
         AU_MAIN_TYPE "kAudioUnitType_MusicEffect"
-        
-        
+
+
         # other settings...
         PLUGIN_MANUFACTURER_CODE Sono
         PLUGIN_CODE ${plugincode}
@@ -335,7 +331,7 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
         Source/mtdm.h
         Source/zitaRev.h
     )
-    set(AOOSourceFiles        
+    set(AOOSourceFiles
         deps/aoo/lib/src/SLIP.hpp
         deps/aoo/lib/src/client.cpp
         deps/aoo/lib/src/client.hpp
@@ -365,7 +361,7 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
         deps/aoo/lib/aoo/aoo_pcm.h
         deps/aoo/lib/aoo/aoo_types.h
         deps/aoo/lib/aoo/aoo_utils.hpp
-        
+
         deps/aoo/deps/md5/md5.c
         deps/aoo/deps/md5/md5.h
         deps/aoo/deps/oscpack/osc/OscOutboundPacketStream.cpp
@@ -382,8 +378,8 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
         deps/aoo/deps/oscpack/osc/OscTypes.h
     )
 
-    target_sources("${target_name}" PRIVATE 
-           ${SourceFiles} 
+    target_sources("${target_name}" PRIVATE
+           ${SourceFiles}
            ${AOOSourceFiles}
        )
 
@@ -402,7 +398,7 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
     #        INTERFACE
     #            $<TARGET_PROPERTY:"${target_name}",INCLUDE_DIRECTORIES>)
 
-    
+
 
     target_include_directories("${target_name}"
         PUBLIC
@@ -412,7 +408,7 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
 
     # Require at least C++17 to build `my_target`
     target_compile_features("${target_name}" PRIVATE cxx_std_17)
-        
+
 
     # This cleans up the folder organization, especially on Xcode.
     # It tucks the Plugin varieties into a "Targets" folder and generate an Xcode Scheme manually
@@ -425,17 +421,17 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
             set_target_properties(${target_name}_${target} PROPERTIES
                 # Tuck the actual plugin targets into a folder where they won't bother us
                 FOLDER "Targets"
-            
+
                 # MacOS only: Sets the default executable that Xcode will open on build
-                # For this exact path to to work, manually build the AudioPluginHost.xcodeproj in the JUCE subdir 
+                # For this exact path to to work, manually build the AudioPluginHost.xcodeproj in the JUCE subdir
                 # XCODE_SCHEME_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/deps/juce/extras/AudioPluginHost/Builds/MacOSX/build/Debug/AudioPluginHost.app"
-            
-                # Let us build the target in Xcode 
+
+                # Let us build the target in Xcode
                 XCODE_GENERATE_SCHEME ON)
         endif()
     endforeach()
-    
-    
+
+
     target_compile_definitions("${target_name}"
         PUBLIC
         JUCE_WEB_BROWSER=0
@@ -582,7 +578,7 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
            -march=native
           )
        endif()
-     
+
        if (TARGET ${target_name}_Standalone)
            # make linux executable all lower case
            string(TOLOWER ${target_name} tmptargname)
@@ -600,15 +596,15 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
         ${LIB_PATHS}
     )
 
-    target_link_libraries("${target_name}" 
+    target_link_libraries("${target_name}"
         PRIVATE
             juce::juce_audio_utils
             juce::juce_dsp
 	    juce::juce_cryptography
             juce::juce_audio_plugin_client
-            
+
             ff_meters
-            
+
             ${target_name}_SBData
 
             opus
@@ -617,7 +613,7 @@ function(sono_add_custom_plugin_target target_name product_name formats is_instr
             juce::juce_recommended_lto_flags
         #   juce::juce_recommended_warning_flags
         )
-            
+
 endfunction()
 
 # most of the targets
@@ -628,4 +624,3 @@ sono_add_custom_plugin_target(SonoBus SonoBus "${FormatsToBuild}" FALSE  "NBus")
 
 # add VSTi target
 sono_add_custom_plugin_target(SonoBusInst "SonoBusInstrument" "VST3" TRUE  "IBus")
-
